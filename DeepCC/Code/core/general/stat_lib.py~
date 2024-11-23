@@ -22,7 +22,7 @@ class InverseGamma:
         input_x = input_x
         t1 = np.power(input_x, -self.alpha-1)
         t2 = np.exp(-self.beta/x)
-        print(t1,t2)
+        print t1, t2
         res = (self.a1 / self.a2) * t1 * t2
         return res
 
@@ -188,7 +188,7 @@ class GaussianMixtureModeling:
 
             cnt = cnt + 1
             if cnt % 10 == 0:
-                print('Diff: ' + str(diff))
+                print 'Diff: ' + str(diff)
         return phi, mixture_mean, mixture_dev, mixture_cov
 
     def vi_learning(self, x, p):
@@ -241,12 +241,12 @@ class GaussianMixtureModeling:
         tmp = phi * (t1 / t2)
         likelihood = tf.reduce_sum(tmp, 1)
         pen_dev = tf.reduce_sum(1.0 / mixture_cov)
-        posterior_z = tf.reduce_sum(tmp, 1, keepdims=True)
+        posterior_z = tf.reduce_sum(tmp, 1, keep_dims=True)
         posterior = tmp / posterior_z
-        kl_divergence = tf.reduce_sum(p * tf.math.log(p / (posterior + 1e-12)), 1)
-        energy = tf.reduce_mean(-tf.math.log(likelihood) + kl_divergence)
+        kl_divergence = tf.reduce_sum(p * tf.log(p / (posterior + 1e-12)), 1)
+        energy = tf.reduce_mean(-tf.log(likelihood) + kl_divergence)
         #energy = tf.reduce_mean(-tf.log(likelihood))
-        return energy, posterior, pen_dev, likelihood, phi, x_t, p_t, z_p, z_t, mixture_mean, mixture_dev, mixture_cov, mixture_dev_det
+        return energy, pen_dev, likelihood, phi, x_t, p_t, z_p, z_t, mixture_mean, mixture_dev, mixture_cov, mixture_dev_det
 
 
 class SoftKMeansMixtureModeling:

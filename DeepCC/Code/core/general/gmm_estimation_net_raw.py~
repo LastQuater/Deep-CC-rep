@@ -27,14 +27,14 @@ class GMMEstimationNetRaw:
         z = [x]
         for i in range(0, len(self.wi)):
             if i == len(self.wi) - 1:
-                zi = tf.nn.dropout(z[i], rate = 1.0 - keep_prob)
+                zi = tf.nn.dropout(z[i], keep_prob=keep_prob)
             else:
                 zi = z[i]
             if i < len(self.wi) - 1:
                 zj = tf.nn.tanh(tf.matmul(zi, self.wi[i]) + self.bi[i]) # tanh, softsign, sigmoid, softplus
             else:
                 zj = tf.nn.softmax(tf.matmul(zi, self.wi[i]) + self.bi[i])
-                # f = tf.matmul(zi, self.wi[i]) + self.bi[i]
+                f = tf.matmul(zi, self.wi[i]) + self.bi[i]
             z.append(zj)
         
         '''
@@ -46,7 +46,7 @@ class GMMEstimationNetRaw:
         print(self.gmm_layer)
         '''
         p = z[len(z)-1]
-        f = z[self.gmm_layer-1] # the representation after 'softmax'
+        # f = z[self.gmm_layer-1] # the representation after 'softmax'
         #f = x # the output of AE
 
         #print'f'

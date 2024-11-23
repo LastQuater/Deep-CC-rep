@@ -1,7 +1,5 @@
 import core.general.param_init as pini
 import tensorflow as tf
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
 
 import core.general.stat_lib as slib
 

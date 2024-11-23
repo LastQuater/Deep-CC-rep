@@ -1,8 +1,6 @@
 from __future__ import division
 import numpy as np
-import tensorflow as tf
 import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
 from sklearn.metrics.cluster import normalized_mutual_info_score
 from sklearn.cluster import KMeans
 import scipy.io as sio
@@ -49,10 +47,10 @@ class KddcupPaeGmm:
         return norm_x
 
     @staticmethod
-    def minmax_normalization(x, base):
-        min_val = np.min(base, axis=0)
-        max_val = np.max(base, axis=0)
-        norm_x = (x - min_val) / (max_val - min_val + 1e-12)
+    def minmax_normalization(x):
+        min_val = np.min(x, axis=0)
+        max_val = np.max(x, axis=0)
+        norm_x = (x - min_val) / (max_val - min_val + 1e-12) + 1e0
         # print norm_x
         return norm_x
 
@@ -135,7 +133,7 @@ class KddcupPaeGmm:
         return MI_T
 
 
-    def MI_loss(self, Ur, Uc):
+    def MI_loss(self, Ur, Uc, org_data):
         # Ur: the cluster assignment matrix for rows, N_ins * N_Row_clus
         # Uc: the cluster assignment matrix for cols, N_att * N_Col_clus
         # return the loss of mutual information between the original data matrix and the reduced data matrix
@@ -152,9 +150,13 @@ class KddcupPaeGmm:
         Uc_max_idx = tf.argmax(Uc, 1)
 
         # T_pro_org = tf.matmul(Ur_max, tf.transpose(Uc_max)) # original table for the joint probability
-        T_pro_org = tf.matmul(Ur, tf.transpose(Uc)) # original table for the joint probability
-        T_pro_org = T_pro_org / tf.reduce_sum(T_pro_org) # normalization: make sum equal 1
+        org_data_max = tf.reduce_max(org_data)
+        org_data_min = tf.reduce_min(org_data)
 
+        T_pro_org = org_data - org_data_min # original table for the joint probability
+        T_pro_org = T_pro_org / tf.reduce_sum(T_pro_org)# normalization: make sum equal 1
+        
+        
         T_pro_red = self.Reduce_Table(T_pro_org, Ur_max_idx, Uc_max_idx) # reduced table
         
         # calculate MI of orginal and reduced tables
@@ -162,8 +164,8 @@ class KddcupPaeGmm:
         MI_red = self.MI_Table(T_pro_red)
         
         #loss = tf.abs((1 - MI_red/MI_org)*(MI_org - MI_red)) # alternative calculation way
-        loss = tf.abs(1 - MI_red/MI_org)
-        loss = tf.log(1+loss)
+        loss =  1e0 - MI_red / MI_org
+        #loss = tf.log(1e0+loss)
 
 
         self.T_pro_org = T_pro_org
@@ -195,6 +197,9 @@ class KddcupPaeGmm:
 
         train_norm_x = self.gaussian_normalization(train_x)
         train_norm_x_col = self.gaussian_normalization(train_x_col)
+
+        #train_norm_x = self.minmax_normalization(train_gauss_norm_x)
+        #train_norm_x_col = self.minmax_normalization(train_gauss_norm_x_col)
 
         # Setup
         train_x_v = tf.placeholder(dtype=tf.float64, shape=[train_norm_x.shape[0], train_norm_x.shape[1]])
@@ -255,8 +260,8 @@ class KddcupPaeGmm:
 
         obj_oa_row =     error_oa * 2e-2  +     train_l2_reg * 2e-2 +     loss * 1e-1 +     pen_dev
         obj_oa_col = error_oa_col * 2e-2  + train_l2_reg_col * 2e-2 + loss_col * 1e-1 + pen_dev_col
-        obj_cross  = self.MI_loss(p_z, p_z_col)
-        obj_oa     = obj_oa_row + obj_oa_col + obj_cross * 1e5
+        obj_cross  = self.MI_loss(p_z, p_z_col, train_x_v)
+        obj_oa     = obj_oa_row + obj_oa_col + obj_cross * 1e6
 
         # train_step = tf.train.AdamOptimizer(1e-4).minimize(obj_oa)
 
@@ -423,6 +428,8 @@ class KddcupPaeGmm:
             # print set_pre
 
             true_label = train_y # numpy
+            #print("min true label:" + str(min(true_label)))
+            #print("min pred label:" + str(min(pred_label)))
             acc, NMI = self.eval(true_label, pred_label)
             print('acc:' + str(acc) + ',' + 'NMI:' + str(NMI))
 
@@ -501,9 +508,9 @@ class KddcupPaeGmm:
 #  'RR_acc':RR_acc, 'RR_nmi':RR_nmi, 'RR_label_size':RR_label_size, 'RR_label_size_col':RR_label_size_col,\
 # 'RR_MI_org':RR_MI_org, 'RR_MI_red':RR_MI_red, 'acc_AE_Kmeans':acc_AE_Kmeans, 'nmi_AE_Kmeans':nmi_AE_Kmeans, 'pred_label_list':pred_label_list, 'pred_label_col_list':pred_label_col_list})
 
-#         prd_lab     = pred_label_list[-1]
-#         prd_lab_col = pred_label_col_list[-1]
-#         sio.savemat('.../DeepCC'+'_'+'coil20'+'_'+'prdlabel.mat', {'prd_lab':prd_lab, 'prd_lab_col':prd_lab_col})
+        prd_lab     = pred_label_list[-1]
+        prd_lab_col = pred_label_col_list[-1]
+        sio.savemat('../DeepCC'+'_'+'coil20'+'_'+'prdlabel.mat', {'prd_lab':prd_lab, 'prd_lab_col':prd_lab_col})
 
         sess.close()
         return RR_acc, RR_nmi

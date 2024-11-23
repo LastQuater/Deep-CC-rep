@@ -46,7 +46,7 @@ class KddcupDataP10:
         self.num_points = sio.loadmat(filename)['fea'].shape[0]
         self.num_dim = sio.loadmat(filename)['fea'].shape[1]
         
-        self.xy = np.column_stack((sio.loadmat(filename)['fea'], sio.loadmat(filename)['gnd'] - 1))
+        self.xy = np.column_stack((sio.loadmat(filename)['fea'], sio.loadmat(filename)['gnd']))
 
 
     def get_clean_training_testing_data(self, ratio):

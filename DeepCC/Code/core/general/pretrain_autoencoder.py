@@ -1,6 +1,4 @@
 import tensorflow as tf
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
 
 import core.general.param_init as pini
 
@@ -48,7 +46,7 @@ class PretrainAutoencoder:
                 z_r = tf.matmul(zj, self.wi[len(self.wi) - 1]) + self.bi[len(self.bi) - 1]
             else:
                 z_r = tf.nn.tanh(tf.matmul(zj, self.wi[ni]) + self.bi[ni])
-            error_l = tf.reduce_mean(tf.norm(zi - z_r, ord=2, axis=1, keep_dims=True))
+            error_l = tf.reduce_mean(tf.norm(zi - z_r, ord=2, axis=1, keepdims=True))
             error.append(error_l * vision_coef)
             zi = zj
             reg.append(tf.nn.l2_loss(self.wi[i]) + tf.nn.l2_loss(self.wi[ni]))
@@ -71,10 +69,10 @@ class PretrainAutoencoder:
         # Cosine similarity
         normalize_x = tf.nn.l2_normalize(x, 1)
         normalize_zo = tf.nn.l2_normalize(zo, 1)
-        cos_sim = tf.reduce_sum(tf.multiply(normalize_x, normalize_zo), 1, keep_dims=True)
-        loss = tf.norm(x - zo, ord=2, axis=1, keep_dims=True)
-        dist = tf.norm(x - zo, ord=2, axis=1, keep_dims=True)
-        relative_dist = dist / tf.norm(x, ord=2, axis=1, keep_dims=True)
+        cos_sim = tf.reduce_sum(tf.multiply(normalize_x, normalize_zo), 1, keepdims=True)
+        loss = tf.norm(x - zo, ord=2, axis=1, keepdims=True)
+        dist = tf.norm(x - zo, ord=2, axis=1, keepdims=True)
+        relative_dist = dist / tf.norm(x, ord=2, axis=1, keepdims=True)
         # self.dist_min = tf.reduce_min(dist)
         # self.dist_max = tf.reduce_max(dist)
         # dist_norm = (dist - self.dist_min) / (self.dist_max - self.dist_min + 1e-12)
@@ -109,8 +107,8 @@ class PretrainAutoencoder:
         # Cosine similarity
         normalize_x = tf.nn.l2_normalize(x, 1)
         normalize_zo = tf.nn.l2_normalize(zo, 1)
-        cos_sim = tf.reduce_sum(tf.multiply(normalize_x, normalize_zo), 1, keep_dims=True)
-        dist = tf.norm(x - zo, ord=2, axis=1, keep_dims=True)
+        cos_sim = tf.reduce_sum(tf.multiply(normalize_x, normalize_zo), 1, keepdims=True)
+        dist = tf.norm(x - zo, ord=2, axis=1, keepdims=True)
         # relative_dist = dist / tf.norm(x, ord=2, axis=1, keep_dims=True)
         # dist_norm = (dist - self.dist_min) / (self.dist_max - self.dist_min + 1e-12)
         # xo = tf.concat([zc, relative_dist, cos_sim], 1)
@@ -137,7 +135,7 @@ class PretrainAutoencoder:
                 z_r = tf.matmul(zj, self.wi[len(self.wi) - 1]) + self.bi[len(self.bi) - 1]
             else:
                 z_r = tf.nn.tanh(tf.matmul(zj, self.wi[ni]) + self.bi[ni])
-            error_l = tf.reduce_mean(tf.norm(zi - z_r, ord=2, axis=1, keep_dims=True))
+            error_l = tf.reduce_mean(tf.norm(zi - z_r, ord=2, axis=1, keepdims=True))
             error.append(error_l * vision_coef)
             zi = zj
             reg.append(tf.nn.l2_loss(self.wi[i]) + tf.nn.l2_loss(self.wi[ni]))
@@ -159,10 +157,10 @@ class PretrainAutoencoder:
         # Cosine similarity
         normalize_x = tf.nn.l2_normalize(x, 1)
         normalize_zo = tf.nn.l2_normalize(zo, 1)
-        cos_sim = tf.reduce_sum(tf.multiply(normalize_x, normalize_zo), 1, keep_dims=True)
-        loss = tf.norm(x - zo, ord=2, axis=1, keep_dims=True)
-        dist = tf.norm(x - zo, ord=2, axis=1, keep_dims=True)
-        relative_dist = dist / tf.norm(x, ord=2, axis=1, keep_dims=True)
+        cos_sim = tf.reduce_sum(tf.multiply(normalize_x, normalize_zo), 1, keepdims=True)
+        loss = tf.norm(x - zo, ord=2, axis=1, keepdims=True)
+        dist = tf.norm(x - zo, ord=2, axis=1, keepdims=True)
+        relative_dist = dist / tf.norm(x, ord=2, axis=1, keepdims=True)
         # self.dist_min = tf.reduce_min(dist)
         # self.dist_max = tf.reduce_max(dist)
         # dist_norm = (dist - self.dist_min) / (self.dist_max - self.dist_min + 1e-12)
